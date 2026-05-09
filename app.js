@@ -23,7 +23,13 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
+
+// Firestore
 const db = firebase.firestore();
+
+
+// Auth
+const auth = firebase.auth();
 
 
 function App() {
@@ -32,14 +38,27 @@ function App() {
 
   const [email, setEmail] = useState("");
 
+  const [password, setPassword] = useState("");
 
-  const saveData = async (e) => {
+
+  const register = async (e) => {
 
     e.preventDefault();
 
     try {
 
-      await db.collection("users").add({
+      // Create User
+      const userCredential = await auth.createUserWithEmailAndPassword(
+
+        email,
+
+        password
+
+      );
+
+
+      // Save User Data
+      await db.collection("users").doc(userCredential.user.uid).set({
 
         name: name,
 
@@ -49,19 +68,25 @@ function App() {
 
       });
 
-      alert("Data Stored Successfully");
+
+      alert("Registration Successful");
+
 
       setName("");
 
       setEmail("");
 
+      setPassword("");
+
+
     } catch (error) {
 
       console.log(error);
 
-      alert("Error storing data");
+      alert(error.message);
     }
   };
+
 
 
   return (
@@ -70,7 +95,8 @@ function App() {
 
       <h1>Gym Registration</h1>
 
-      <form onSubmit={saveData}>
+      <form onSubmit={register}>
+
 
         <input
           type="text"
@@ -80,6 +106,7 @@ function App() {
           required
         />
 
+
         <input
           type="email"
           placeholder="Enter Email"
@@ -87,6 +114,16 @@ function App() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
+
+
+        <input
+          type="password"
+          placeholder="Enter Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
 
         <button type="submit">
 
